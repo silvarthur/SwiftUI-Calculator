@@ -47,7 +47,7 @@ enum Operation {
 struct ContentView: View {
 
     @State var value = "0"
-    @State var runningNumber = 0
+    @State var runningNumber = 0.0
     @State var currentOperation: Operation = .none
 
     let buttons: [[CalcButton]] = [
@@ -68,7 +68,7 @@ struct ContentView: View {
                 // Text display
                 HStack {
                     Spacer()
-                    Text(value)
+                    Text(getFormatedInputToBeDisplayed(input: value))
                         .bold()
                         .font(.system(size: 100))
                         .foregroundColor(.white)
@@ -105,23 +105,23 @@ struct ContentView: View {
         case .add, .subtract, .mutliply, .divide, .equal:
             if button == .add {
                 self.currentOperation = .add
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0
             }
             else if button == .subtract {
                 self.currentOperation = .subtract
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0
             }
             else if button == .mutliply {
                 self.currentOperation = .multiply
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0
             }
             else if button == .divide {
                 self.currentOperation = .divide
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0
             }
             else if button == .equal {
                 let runningValue = self.runningNumber
-                let currentValue = Int(self.value) ?? 0
+                let currentValue = Double(self.value) ?? 0
                 switch self.currentOperation {
                 case .add: self.value = "\(runningValue + currentValue)"
                 case .subtract: self.value = "\(runningValue - currentValue)"
@@ -138,6 +138,14 @@ struct ContentView: View {
         case .clear:
             self.value = "0"
         case .decimal, .negative, .percent:
+            if button == .negative {
+                let currentValue = -(Double(self.value) ?? 0)
+                self.value = "\(currentValue)"
+            } else if button == .decimal {
+                if !value.contains(".") {
+                    self.value = self.value + "."
+                }
+            }
             break
         default:
             let number = button.rawValue
@@ -147,6 +155,16 @@ struct ContentView: View {
             else {
                 self.value = "\(self.value)\(number)"
             }
+        }
+    }
+    
+    func getFormatedInputToBeDisplayed(input: String) -> String {
+        let integerPart = String(input[..<(input.firstIndex(of: ".") ?? input.endIndex)])
+        
+        if Double(input)!/Double(integerPart)! > 1 {
+            return input
+        } else {
+            return integerPart
         }
     }
 
